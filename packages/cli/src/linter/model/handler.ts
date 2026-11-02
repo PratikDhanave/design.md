@@ -377,7 +377,12 @@ function parseTypography(props: Record<string, string | number>, path: string, f
   const dimensionProps = ['fontSize', 'lineHeight', 'letterSpacing'] as const;
   for (const prop of dimensionProps) {
     const raw = props[prop];
-    if (typeof raw === 'string') {
+    if (prop === 'lineHeight' && typeof raw === 'number') {
+      // A unitless numeric lineHeight (YAML `lineHeight: 1.5`) is equivalent to
+      // its string form `"1.5"`, which is parsed into a unitless dimension
+      // below. Without this branch the number is silently dropped.
+      result[prop] = { type: 'dimension', value: raw, unit: '' };
+    } else if (typeof raw === 'string') {
       if (isParseableDimension(raw)) {
         const parsed = parseDimension(raw);
         if (parsed.unit !== 'px' && parsed.unit !== 'rem' && parsed.unit !== 'em') {
