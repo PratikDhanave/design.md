@@ -476,6 +476,21 @@ describe('ModelHandler', () => {
       expect(headline?.fontWeight).toBe(700);
     });
 
+    it('accepts a unitless numeric lineHeight (equivalent to its string form)', () => {
+      const numeric = handler.execute(makeParsed({
+        typography: { 'headline': { lineHeight: 1.5 } },
+      }));
+      expect(numeric.findings.length).toBe(0);
+      const fromNumber = numeric.designSystem.typography.get('headline')?.lineHeight;
+      expect(fromNumber).toEqual({ type: 'dimension', value: 1.5, unit: '' });
+
+      // A number and its string spelling must resolve identically.
+      const str = handler.execute(makeParsed({
+        typography: { 'headline': { lineHeight: '1.5' } },
+      }));
+      expect(str.designSystem.typography.get('headline')?.lineHeight).toEqual(fromNumber);
+    });
+
     it('warns about unrecognized typography sub-properties that are silently dropped', () => {
       const result = handler.execute(makeParsed({
         typography: {
